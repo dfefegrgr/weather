@@ -2,22 +2,15 @@
 <div id="home">
   <div class="box" >
     <div class="date">{{dataBuilder()}}</div>
-    <div class="card" v-on:click="fetchWeather('chengdu')" >
+
+
+    <div class="card" v-for="weather in cityMap.values()">
       <div class="location" >{{weather.name}}</div>
       <div class="weather_box" v-if="typeof  weather.main!='undefined'">
         <div class="weather_tem">{{ Math.round(weather.main.temp) }}</div>
         <div class="weather_weather">{{ weather.weather[0].main }}</div>
       </div>
     </div>
-    <div class="card" v-on:click="fetchWeather('shanghai')">
-      <div class="location" >{{weather.name}}</div>
-      <div class="weather_box" v-if="typeof  weather.main!='undefined'">
-        <div class="weather_tem">{{ Math.round(weather.main.temp) }}</div>
-        <div class="weather_weather">{{ weather.weather[0].main }}</div>
-      </div>
-    </div>
-    <div class="card">3</div>
-    <div class="card">4</div>
   </div>
 
 </div>
@@ -30,17 +23,22 @@ export default {
     return{
       api_key:"5a306bc73f0cb9922c8fd498d92bcce6",
       url_base:"https://api.openweathermap.org/data/2.5/",
-      weather:{}
+      cityMap: new Map(),
     }
   },
   mounted() {
-
+    this.fetchWeather('chengdu')
+    this.fetchWeather('shanghai')
+    this.fetchWeather('bazhong')
+    this.fetchWeather('ganzhou')
   },
   methods:{
     async fetchWeather(A){
       fetch(`${this.url_base}weather?q=${A}&units=metric&APPID=${this.api_key}`)
             .then (res=>{return res.json();})
-            .then( res=>{return this.weather =res} )
+            .then( res=>{
+              this.cityMap.set(A,res)
+            })
     },
 
     dataBuilder(){
