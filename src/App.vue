@@ -1,16 +1,18 @@
 <template>
 <div id="home">
   <div class="box" >
-    <div class="date">{{dataBuilder()}}</div>
+    <div class="dateYear">{{db.year}}</div>
+    <div class="date">{{db.day}},{{db.date}} {{db.month}}</div>
 
+      <div class="card" v-for="weather in cityMap.values()">
+          <div class="location" >{{weather.name}}</div>
+        <div class="weather_box" v-if="typeof  weather.main!='undefined'">
+          <div class="weather_tem">{{ Math.round(weather.main.temp) }}℃</div>
+          <div class="weather_weather">{{ weather.weather[0].main }}</div>
+        </div>
 
-    <div class="card" v-for="weather in cityMap.values()">
-      <div class="location" >{{weather.name}}</div>
-      <div class="weather_box" v-if="typeof  weather.main!='undefined'">
-        <div class="weather_tem">{{ Math.round(weather.main.temp) }}</div>
-        <div class="weather_weather">{{ weather.weather[0].main }}</div>
-      </div>
-    </div>
+       </div>
+
   </div>
 
 </div>
@@ -24,9 +26,11 @@ export default {
       api_key:"5a306bc73f0cb9922c8fd498d92bcce6",
       url_base:"https://api.openweathermap.org/data/2.5/",
       cityMap: new Map(),
+      db: {}
     }
   },
   mounted() {
+    this.db=this.dataBuilder()
     this.fetchWeather('chengdu')
     this.fetchWeather('shanghai')
     this.fetchWeather('bazhong')
@@ -43,13 +47,15 @@ export default {
 
     dataBuilder(){
       let d=new Date();
-      let months=["1月","2月","3月","4月","5月","6月","7月","8月","9月","10月","11月","12月"];
-      let days=["星期一","星期二","星期三","星期四","星期五","星期六","星期日"]
+      let months=["January","February","March","April","May","June","July","August","September","October","November","December"];
+      let days=["Sunday","Monday","Tuesday","Wednesday","Thursday","Fridy","Saturday"]
       let day=days[d.getDay()];
       let date=d.getDate();
       let month=months[d.getMonth()];
       let year=d.getFullYear();
-      return `${year}年 ${month} ${date}日 ${day} `;
+      return {
+         month:month,date:date,day:day,year:year
+      };
     }
   }
 }
@@ -59,11 +65,9 @@ export default {
 html,
 body{
   height: 100%;
-  //border: 3px solid black;
 }
 #app {
   height: 100%;
-  background-color: rgb(87, 232, 219);
 }
 
 #home{
@@ -72,8 +76,7 @@ body{
   position: relative;
   display: flex;
   justify-content: center;
-  border: 3px solid red;
-}
+   }
 .box{
   position: absolute;
   top: 50px;
@@ -81,8 +84,10 @@ body{
   display: flex;
   flex-direction: column;
   align-items: center;
-  border: 3px solid yellow;
+
+
 }
+
 .card{
   display: flex;
   position: relative;
@@ -90,31 +95,45 @@ body{
   max-height: 100px;
   width: 80%;
   height: 20vw;
-  border: 3px solid pink;
   padding: 5px 0;
   margin: 20px 0;
+  box-shadow: -6px -6px 20px rgba(255,255,255,1),
+              -6px -6px 20px rgba(255,255,255,0.5),
+              inset 6px 6px 20px rgba(255,255,255,0.1),
+              6px 6px 20px rgba(0,0,0,0.15),
+}
+
+.dateYear{
+  color: #5a84a2;
+  font-size:40px;
+  font-weight: 600;
+  text-align: center;
+  text-shadow: 6px 6px 20px rgba(0,0,0,0.15);
 }
 .date{
-  color: black;
-  font-size:24px;
-  font-weight: 300;
+  color: #5a84a2;
+  font-size:30px;
+  font-weight: 500;
   text-align: center;
-  box-shadow: 1px 2px rgba(0,0,0,0.5);
+  text-shadow: 6px 6px 20px rgba(0,0,0,0.15);
 }
 
 .location{
   position: absolute;
-  left: 10px;
-  color: black;
-  font-size:32px;
-  font-weight: 500;
-  margin-top: 10px;
+  left: 30px;
+  color: #5a84a2;
+  font-size:36px;
+  font-weight: 700;
+  margin-top: 20px;
+  text-shadow: 6px 6px 20px rgba(0,0,0,0.15);
 }
 .weather_box{
   position: absolute;
-  right:20px;
-  color: black;
+  left: 65%;
+  margin-top: 10px;
+  color: #5a84a2;
   font-size: 30px;
+  text-shadow: 6px 6px 20px rgba(0,0,0,0.15);
 
 }
 .weather_tem{
