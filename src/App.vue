@@ -4,11 +4,17 @@
     <div class="dateYear">{{db.year}}</div>
     <div class="date">{{db.day}},{{db.date}} {{db.month}}</div>
 
-      <div class="card" v-for="weather in cityMap.values()">
-          <div class="location" >{{weather.name}}</div>
+      <div
+          class="card"
+           v-for="weather in cityMap.values()"
+           v-bind:style="{
+             backgroundImage:weather.weather[0].main==='Clear'?`url(${clear})`:`url(${clouds})`
+           }"
+      >
+          <div class="location"  >{{weather.name}}</div>
         <div class="weather_box" v-if="typeof  weather.main!='undefined'">
           <div class="weather_tem">{{ Math.round(weather.main.temp) }}℃</div>
-          <div class="weather_weather">{{ weather.weather[0].main }}</div>
+          <div class="weather_weather"  >{{ weather.weather[0].main }}</div>
         </div>
 
        </div>
@@ -19,6 +25,7 @@
 </template>
 
 <script>
+import {ref} from "vue";
 export default {
   name:"home",
   data(){
@@ -26,7 +33,10 @@ export default {
       api_key:"5a306bc73f0cb9922c8fd498d92bcce6",
       url_base:"https://api.openweathermap.org/data/2.5/",
       cityMap: new Map(),
-      db: {}
+      db: {},
+      clear:require("./assets/sunny.jpg"),
+      clouds:require("./assets/clouds.jpg"),
+      rain:require("./assets/rain.jpg"),
     }
   },
   mounted() {
@@ -42,6 +52,7 @@ export default {
             .then (res=>{return res.json();})
             .then( res=>{
               this.cityMap.set(A,res)
+              console.log(this.cityMap)
             })
     },
 
@@ -65,6 +76,14 @@ export default {
 html,
 body{
   height: 100%;
+  -webkit-user-select: none;
+  -webkit-touch-callout: none;
+  -webkit-tap-highlight-color: transparent;
+
+}
+body{
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen,
+    Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
 }
 #app {
   height: 100%;
@@ -80,20 +99,21 @@ body{
 .box{
   position: absolute;
   top: 50px;
-  width: 90%;
+  width: 100%;
   display: flex;
   flex-direction: column;
   align-items: center;
 
-
 }
 
 .card{
+  //-webkit-text-stroke-width: 1px;
+  //-webkit-text-stroke-color: black;
   display: flex;
   position: relative;
   max-width: 500px;
   max-height: 100px;
-  width: 80%;
+  width: 90%;
   height: 20vw;
   padding: 5px 0;
   margin: 20px 0;
@@ -102,10 +122,13 @@ body{
               inset 6px 6px 20px rgba(255,255,255,0.1),
               6px 6px 20px rgba(0,0,0,0.15),
 }
+.card::after{
+  filter: blur(2px);
+}
 
 .dateYear{
   color: #5a84a2;
-  font-size:40px;
+  font-size:2.5rem;
   font-weight: 600;
   text-align: center;
   text-shadow: 6px 6px 20px rgba(0,0,0,0.15);
@@ -120,19 +143,19 @@ body{
 
 .location{
   position: absolute;
-  left: 30px;
-  color: #5a84a2;
-  font-size:36px;
-  font-weight: 700;
+  left: 1rem;
+  color: white;
+  font-size:1.7rem;
+  font-weight: 600;
   margin-top: 20px;
   text-shadow: 6px 6px 20px rgba(0,0,0,0.15);
 }
 .weather_box{
   position: absolute;
   left: 65%;
-  margin-top: 10px;
-  color: #5a84a2;
-  font-size: 30px;
+  //margin-top: 1rem;
+  color: white;
+  font-size: 1.7rem;
   text-shadow: 6px 6px 20px rgba(0,0,0,0.15);
 
 }
