@@ -8,7 +8,7 @@
           class="card"
            v-for="weather in cityMap.values()"
            v-bind:style="{
-             backgroundImage:weather.weather[0].main==='Clear'?`url(${clear})`:`url(${clouds})`
+             backgroundImage: `url(${getImgUrl(weather.weather[0].main)})`
            }"
       >
           <div class="location"  >{{weather.name}}</div>
@@ -37,9 +37,13 @@ export default {
       clear:require("./assets/sunny.jpg"),
       clouds:require("./assets/clouds.jpg"),
       rain:require("./assets/rain.jpg"),
+      imgMap: new Map()
     }
   },
   mounted() {
+    this.imgMap.set("Clear",this.clear)
+    this.imgMap.set("Rain",this.rain)
+    this.imgMap.set("Clouds",this.clouds)
     this.db=this.dataBuilder()
     this.fetchWeather('chengdu')
     this.fetchWeather('shanghai')
@@ -54,6 +58,11 @@ export default {
               this.cityMap.set(A,res)
               console.log(this.cityMap)
             })
+    },
+
+    getImgUrl(key){
+      if(this.imgMap.has(key))return this.imgMap.get(key)
+      else return this.clouds
     },
 
     dataBuilder(){
