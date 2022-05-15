@@ -34,9 +34,9 @@ export default {
       url_base:"https://api.openweathermap.org/data/2.5/",
       cityMap: new Map(),
       db: {},
-      clear:require("./assets/sunny.jpg"),
-      clouds:require("./assets/clouds.jpg"),
-      rain:require("./assets/rain.jpg"),
+      clear:'https://user-images.githubusercontent.com/104249805/168463327-e7e11959-a501-4a73-a59a-9c85dad5fb1c.jpg',
+      clouds:'https://user-images.githubusercontent.com/104249805/168463720-f83d91b3-dbe6-49a7-9f4c-46c29ddba785.jpg',
+      rain:'https://user-images.githubusercontent.com/104249805/168463320-f977fe7e-79a1-40db-aabb-fb812acac067.jpg',
       imgMap: new Map()
     }
   },
