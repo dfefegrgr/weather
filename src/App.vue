@@ -1,6 +1,7 @@
 <template>
 <div id="home">
   <div class="box" >
+
     <div class="dateYear">{{db.year}}</div>
     <div class="date">{{db.day}},{{db.date}} {{db.month}}</div>
 
@@ -11,13 +12,18 @@
              backgroundImage: `url(${getImgUrl(weather.weather[0].main)})`
            }"
       >
-          <div class="location"  >{{weather.name}}</div>
+        <div class="location"  >{{weather.name}}</div>
+        <div v-if="forecastMap!==''" v-for="x in 7">
+      {{forecastMap.daily[x].weather[0].description}}
+      {{Math.round(forecastMap.daily[x].temp.day-273)}}℃
+    </div>
         <div class="weather_box" v-if="typeof  weather.main!='undefined'">
           <div class="weather_tem">{{ Math.round(weather.main.temp) }}℃</div>
           <div class="weather_weather"  >{{ weather.weather[0].main }}</div>
         </div>
 
        </div>
+
 
   </div>
 
@@ -37,7 +43,8 @@ export default {
       clear:'https://user-images.githubusercontent.com/104249805/168463327-e7e11959-a501-4a73-a59a-9c85dad5fb1c.jpg',
       clouds:'https://user-images.githubusercontent.com/104249805/168463720-f83d91b3-dbe6-49a7-9f4c-46c29ddba785.jpg',
       rain:'https://user-images.githubusercontent.com/104249805/168463320-f977fe7e-79a1-40db-aabb-fb812acac067.jpg',
-      imgMap: new Map()
+      imgMap: new Map(),
+      forecastMap:''
     }
   },
   mounted() {
@@ -49,20 +56,30 @@ export default {
     this.fetchWeather('shanghai')
     this.fetchWeather('bazhong')
     this.fetchWeather('ganzhou')
+    this.fetchForecast()
   },
   methods:{
-    async fetchWeather(A){
+    fetchWeather(A){
       fetch(`${this.url_base}weather?q=${A}&units=metric&APPID=${this.api_key}`)
             .then (res=>{return res.json();})
             .then( res=>{
               this.cityMap.set(A,res)
-              console.log(this.cityMap)
             })
     },
 
     getImgUrl(key){
       if(this.imgMap.has(key))return this.imgMap.get(key)
       else return this.clouds
+    },
+    fetchForecast(){
+      fetch(`${this.url_base}onecall?lat=30.39&lon=104.04&lang=zh_cn&appid=${this.api_key}`)
+        .then(res=>{return res.json();})
+        .then(res=>{
+          this.forecastMap=res;
+          console.log(this.forecastMap);
+          console.log(this.forecastMap.daily[0].temp.day-273);
+          console.log(this.forecastMap.daily[0].weather[0].description)
+        })
     },
 
     dataBuilder(){
