@@ -1,30 +1,31 @@
 <template>
 <div id="home">
   <div class="box" >
-
-    <div class="dateYear">{{db.year}}</div>
-    <div class="date">{{db.day}},{{db.date}} {{db.month}}</div>
-
-      <div
-          class="card"
-           v-for="weather in cityMap.values()"
-           v-bind:style="{
-             backgroundImage: `url(${getImgUrl(weather.weather[0].main)})`
-           }"
-      >
-        <div class="location"  >{{weather.name}}</div>
-        <div v-if="forecastMap!==''" v-for="x in 7">
-      {{forecastMap.daily[x].weather[0].description}}
-      {{Math.round(forecastMap.daily[x].temp.day-273)}}℃
+    <h2 class="date">{{db.year}}年{{db.month}}{{db.date}}日{{db.day}}</h2>
+    <h2>今日天气</h2>
+    <div class="currentWeather">
+      <div class="card" v-for="weather in cityMap.values()">
+      <div class="weather_box" v-if="typeof  weather.main!='undefined'">
+        <div>{{cityNameMap.get(weather.name)}}</div>
+        <div>{{ weather.weather[0].description }}</div>
+        <div>{{ Math.round(weather.main.temp) }}℃</div>
+      </div>
+      </div>
     </div>
-        <div class="weather_box" v-if="typeof  weather.main!='undefined'">
-          <div class="weather_tem">{{ Math.round(weather.main.temp) }}℃</div>
-          <div class="weather_weather"  >{{ weather.weather[0].main }}</div>
+
+    <h2>未来5日预测</h2>
+    <div class="forecast" v-for="loc in locationMap.values()">
+      <div class="location">{{mappingMap.get(loc.lat+","+loc.lon)}}</div>
+      <div class="card2"  v-for="x in 5" v-if="typeof loc.daily!='undefined'" >
+        <div class="">
+          {{loc.daily[x].weather[0].description}}
+        </div>
+        <div>
+          {{Math.round(loc.daily[x].temp.day)}}℃
         </div>
 
-       </div>
-
-
+      </div>
+    </div>
   </div>
 
 </div>
@@ -40,52 +41,56 @@ export default {
       url_base:"https://api.openweathermap.org/data/2.5/",
       cityMap: new Map(),
       db: {},
-      clear:'https://user-images.githubusercontent.com/104249805/168463327-e7e11959-a501-4a73-a59a-9c85dad5fb1c.jpg',
-      clouds:'https://user-images.githubusercontent.com/104249805/168463720-f83d91b3-dbe6-49a7-9f4c-46c29ddba785.jpg',
-      rain:'https://user-images.githubusercontent.com/104249805/168463320-f977fe7e-79a1-40db-aabb-fb812acac067.jpg',
-      imgMap: new Map(),
-      forecastMap:''
+      locationMap:new Map(),
+      mappingMap: new Map(),
+      cityNameMap:new Map([
+          ['Chengdu','成都'],
+          ['Shanghai','上海'],
+          ['Bazhong','巴中'],
+          ['Ganzhou','赣州'],
+          ])
     }
   },
   mounted() {
-    this.imgMap.set("Clear",this.clear)
-    this.imgMap.set("Rain",this.rain)
-    this.imgMap.set("Clouds",this.clouds)
     this.db=this.dataBuilder()
     this.fetchWeather('chengdu')
     this.fetchWeather('shanghai')
     this.fetchWeather('bazhong')
     this.fetchWeather('ganzhou')
-    this.fetchForecast()
+    //chengdu
+    this.fetchForecast(['30.39','104.04'])
+    //shanghai
+    this.fetchForecast(['31.22','121.48'])
+    //bazhong
+    this.fetchForecast(['31.85','106.754'])
+    //ganzhou
+    this.fetchForecast(['25.83','114.93'])
+    this.mappingMap.set('30.39,104.04','成都')
+    this.mappingMap.set('31.22,121.48','上海')
+    this.mappingMap.set('31.85,106.754','巴中')
+    this.mappingMap.set('25.83,114.93','赣州')
   },
   methods:{
     fetchWeather(A){
-      fetch(`${this.url_base}weather?q=${A}&units=metric&APPID=${this.api_key}`)
+      fetch(`${this.url_base}weather?q=${A}&lang=zh_cn&units=metric&APPID=${this.api_key}`)
             .then (res=>{return res.json();})
             .then( res=>{
               this.cityMap.set(A,res)
             })
     },
 
-    getImgUrl(key){
-      if(this.imgMap.has(key))return this.imgMap.get(key)
-      else return this.clouds
-    },
-    fetchForecast(){
-      fetch(`${this.url_base}onecall?lat=30.39&lon=104.04&lang=zh_cn&appid=${this.api_key}`)
+    fetchForecast(A){
+      fetch(`${this.url_base}onecall?lat=${A[0]}&lon=${A[1]}&lang=zh_cn&units=metric&appid=${this.api_key}`)
         .then(res=>{return res.json();})
         .then(res=>{
-          this.forecastMap=res;
-          console.log(this.forecastMap);
-          console.log(this.forecastMap.daily[0].temp.day-273);
-          console.log(this.forecastMap.daily[0].weather[0].description)
-        })
+          this.locationMap.set(A,res);
+          console.log(this.locationMap)})
     },
 
     dataBuilder(){
       let d=new Date();
-      let months=["January","February","March","April","May","June","July","August","September","October","November","December"];
-      let days=["Sunday","Monday","Tuesday","Wednesday","Thursday","Fridy","Saturday"]
+      let months=["1月","2月","3月","4月","5月","6月","7月","8月","9月","10月","11月","12月"];
+      let days=["星期一","星期二","星期三","星期四","星期五","星期六","星期日"]
       let day=days[d.getDay()];
       let date=d.getDate();
       let month=months[d.getMonth()];
@@ -108,11 +113,13 @@ body{
 
 }
 body{
-  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen,
-    Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
+ font: 12px/18px Simsun,Helvetica,Arial,sans-serif;
 }
 #app {
   height: 100%;
+  font-size: 14px;
+  color: #344665;
+  line-height: 25px;
 }
 
 #home{
@@ -123,71 +130,48 @@ body{
   justify-content: center;
    }
 .box{
-  position: absolute;
-  top: 50px;
+  padding: 2rem 9%;
+  position: relative;
   width: 100%;
   display: flex;
   flex-direction: column;
   align-items: center;
-
 }
-
-.card{
-  //-webkit-text-stroke-width: 1px;
-  //-webkit-text-stroke-color: black;
+h2{
+  font-size: 20px;
+}
+.currentWeather{
   display: flex;
-  position: relative;
-  max-width: 500px;
-  max-height: 100px;
-  width: 90%;
-  height: 20vw;
-  padding: 5px 0;
-  margin: 20px 0;
-  box-shadow: -6px -6px 20px rgba(255,255,255,1),
-              -6px -6px 20px rgba(255,255,255,0.5),
-              inset 6px 6px 20px rgba(255,255,255,0.1),
-              6px 6px 20px rgba(0,0,0,0.15),
+  flex-direction: row;
+  font-size: 14px;
+  color: #344665;
+  line-height: 25px;
 }
-.card::after{
-  filter: blur(2px);
+.forecast{
+  display: flex;
+  font-size: 14px;
+  color: #344665;
+  line-height: 25px;
 }
-
-.dateYear{
-  color: #5a84a2;
-  font-size:2.5rem;
-  font-weight: 600;
-  text-align: center;
-  text-shadow: 6px 6px 20px rgba(0,0,0,0.15);
-}
-.date{
-  color: #5a84a2;
-  font-size:30px;
-  font-weight: 500;
-  text-align: center;
-  text-shadow: 6px 6px 20px rgba(0,0,0,0.15);
-}
-
 .location{
-  position: absolute;
-  left: 1rem;
-  color: white;
-  font-size:1.7rem;
-  font-weight: 600;
-  margin-top: 20px;
-  text-shadow: 6px 6px 20px rgba(0,0,0,0.15);
+  display: flex;
+  flex-direction: column;
 }
+.card2{
+  display: flex;
+  flex-direction: column;
+  width: 60px;
+  height: 70px;
+  text-align: center;
+}
+
 .weather_box{
-  position: absolute;
-  left: 65%;
-  //margin-top: 1rem;
-  color: white;
-  font-size: 1.7rem;
-  text-shadow: 6px 6px 20px rgba(0,0,0,0.15);
 
 }
-.weather_tem{
+.card{
+  width: 60px;
+  height: 80px;
 
 }
-.weather_weather{
-}
+
 </style>
